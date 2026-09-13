@@ -90,7 +90,7 @@ jobs:
 
             cat <<EOF > .env
             MONGO_URI=${{secrets.MONGO_URI}}
-            PORT=${{secrests.PORT}}
+            PORT=${{secrets.PORT}}
             VITE_API_URL=${{secrets.VITE_API_URL}}
             EOF
 
