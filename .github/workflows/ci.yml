@@ -89,7 +89,7 @@ jobs:
             if [ ! -d ".git" ]; then
               echo "Первый деплой: клонирую репозиторий..."
               # ЗАМЕНИТЕ ССЫЛКУ НА ВАШ РЕПОЗИТОРИЙ НИЖЕ (точка в конце обязательна)
-              git clone https://github.com/timaZhuk/DevOps-NERN-practice.git .
+              git clone https://github.com/timaZhuk/DevOps-NERN-practice.git
             else
               echo "Репозиторий найден: обновляю код..."
               git fetch --all
