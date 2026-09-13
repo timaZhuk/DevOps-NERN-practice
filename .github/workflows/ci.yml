@@ -83,18 +83,18 @@ jobs:
           ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
             set -e
             mkdir -p ~/${EC2_APP_DIR}
-            cd "${EC2_APP_DIR}"
+            cd ~/${EC2_APP_DIR}
 
-            # Проверяем, существует ли папка .git
+            # Безопасный способ привязать репозиторий, даже если папка не пуста
             if [ ! -d ".git" ]; then
-              echo "Первый деплой: клонирую репозиторий..."
-              # ЗАМЕНИТЕ ССЫЛКУ НА ВАШ РЕПОЗИТОРИЙ НИЖЕ (точка в конце обязательна)
-              git clone https://github.com/timaZhuk/DevOps-NERN-practice.git
-            else
-              echo "Репозиторий найден: обновляю код..."
-              git fetch --all
-              git reset --hard origin/main
+              echo "Инициализация гит-репозитория..."
+              git init
+              git remote add origin https://github.com/timaZhuk/DevOps-NERN-practice.git
             fi
+
+            echo "Скачивание последних изменений..."
+            git fetch --all
+            git reset --hard origin/main
 
             cat <<EOF > .env
             MONGO_URI=${{secrets.MONGO_URI}}
@@ -102,13 +102,12 @@ jobs:
             VITE_API_URL=${{secrets.VITE_API_URL}}
             EOF
 
-            # Copy files .env to folders
+            # Копируем .env в папки сервисов (если папки существуют)
+            mkdir -p server client
             cp .env ./server/.env
             cp .env ./client/.env
 
             docker compose up -d --build
-
             docker image prune -f
-
             docker compose ps
           ENDSSH
