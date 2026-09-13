@@ -85,8 +85,16 @@ jobs:
             mkdir -p ~/${EC2_APP_DIR}
             cd "${EC2_APP_DIR}"
 
-            git fetch --all
-            git reset --hard origin/main
+            # Проверяем, существует ли папка .git
+            if [ ! -d ".git" ]; then
+              echo "Первый деплой: клонирую репозиторий..."
+              # ЗАМЕНИТЕ ССЫЛКУ НА ВАШ РЕПОЗИТОРИЙ НИЖЕ (точка в конце обязательна)
+              git clone https://github.com/timaZhuk/DevOps-NERN-practice.git .
+            else
+              echo "Репозиторий найден: обновляю код..."
+              git fetch --all
+              git reset --hard origin/main
+            fi
 
             cat <<EOF > .env
             MONGO_URI=${{secrets.MONGO_URI}}
