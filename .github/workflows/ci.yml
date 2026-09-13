@@ -76,7 +76,7 @@ jobs:
 
       - name: Deploy on EC2 (git pull + docker compose up -d --build)
         run: |
-          # 1. Формируем файл скрипта локально (GitHub Actions сам подставит секреты)
+          # 1. Формируем файл скрипта локально
           cat << 'EOF' > deploy.sh
           set -e
           echo "1. Успешное подключение к серверу!"
@@ -111,5 +111,8 @@ jobs:
           docker compose ps
           EOF
 
-          # 2. Выполняем этот скрипт на сервере EC2 по SSH
-          ssh -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'bash -s' < deploy.sh
+          # 2. Передаем скрипт на сервер Ubuntu 24.04 (в папку /tmp/)
+          scp -i ec2_key.pem -o StrictHostKeyChecking=no deploy.sh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/deploy.sh
+
+          # 3. Выполняем переданный скрипт
+          ssh -i ec2_key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "bash /tmp/deploy.sh"
