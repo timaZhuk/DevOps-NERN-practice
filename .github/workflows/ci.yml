@@ -111,7 +111,7 @@ jobs:
           docker compose ps
           EOF
 
-          # 2. Передаем скрипт на сервер Ubuntu 24.04 (в папку /tmp/)
+          # 2. Передаем скрипт на сервер Ubuntu 24.04 (в папку /tmp/ ok)
           scp -i ec2_key.pem -o StrictHostKeyChecking=no deploy.sh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/tmp/deploy.sh
 
           # 3. Выполняем переданный скрипт
