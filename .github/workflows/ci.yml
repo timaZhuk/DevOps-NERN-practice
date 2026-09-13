@@ -80,7 +80,7 @@ jobs:
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_APP_DIR: ${{ secrets.EC2_APP_DIR }}
         run: |
-          ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << EOF
+          ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
             set -e
             mkdir -p ~/${EC2_APP_DIR}
             cd "${EC2_APP_DIR}"
@@ -103,3 +103,4 @@ jobs:
             docker image prune -f
 
             docker compose ps
+          ENDSSH
