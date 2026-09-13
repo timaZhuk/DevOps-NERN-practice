@@ -76,40 +76,40 @@ jobs:
 
       - name: Deploy on EC2 (git pull + docker compose up -d --build)
         run: |
-          ssh -T -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'bash -s' << 'ENDSSH'
-            set -e
-            echo "1. Успешное подключение к серверу!"
-            
-            mkdir -p ~/${{ secrets.EC2_APP_DIR }}
-            cd ~/${{ secrets.EC2_APP_DIR }}
-            echo "2. Директория проекта готова."
+          # 1. Формируем файл скрипта локально (GitHub Actions сам подставит секреты)
+          cat << 'EOF' > deploy.sh
+          set -e
+          echo "1. Успешное подключение к серверу!"
 
-            # Безопасный способ привязать репозиторий
-            if [ ! -d ".git" ]; then
-              echo "3. Инициализация гит-репозитория..."
-              git init
-              git remote add origin https://github.com/timaZhuk/DevOps-NERN-practice.git
-            fi
+          mkdir -p ~/${{ secrets.EC2_APP_DIR }}
+          cd ~/${{ secrets.EC2_APP_DIR }}
 
-            echo "4. Скачивание последних изменений..."
-            git fetch --all
-            git reset --hard origin/main
+          if [ ! -d ".git" ]; then
+            echo "2. Инициализация гит-репозитория..."
+            git init
+            git remote add origin https://github.com/timaZhuk/DevOps-NERN-practice.git
+          fi
 
-            echo "5. Создание файлов конфигурации .env..."
-            cat << 'EOF' > .env
-            MONGO_URI=${{secrets.MONGO_URI}}
-            PORT=${{secrets.PORT}}
-            VITE_API_URL=${{secrets.VITE_API_URL}}
-            EOF
+          echo "3. Обновление кода..."
+          git fetch --all
+          git reset --hard origin/main
 
-            mkdir -p server client
-            cp .env ./server/.env
-            cp .env ./client/.env
+          echo "4. Создание .env файлов..."
+          cat << 'ENV_EOF' > .env
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          PORT=${{ secrets.PORT }}
+          VITE_API_URL=${{ secrets.VITE_API_URL }}
+          ENV_EOF
 
-            echo "6. Сборка и запуск Docker-контейнеров..."
-            docker compose up -d --build
-            docker image prune -f
-            
-            echo "7. Деплой успешно завершен! Статус контейнеров:"
-            docker compose ps
-          ENDSSH
+          mkdir -p server client
+          cp .env ./server/.env
+          cp .env ./client/.env
+
+          echo "5. Запуск Docker..."
+          docker compose up -d --build
+          docker image prune -f
+          docker compose ps
+          EOF
+
+          # 2. Выполняем этот скрипт на сервере EC2 по SSH
+          ssh -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'bash -s' < deploy.sh
