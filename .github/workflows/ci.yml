@@ -75,17 +75,14 @@ jobs:
           EC2_KEY: ${{ secrets.EC2_KEY }}
 
       - name: Deploy on EC2 (git pull + docker compose up -d --build)
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_APP_DIR: ${{ secrets.EC2_APP_DIR }}
         run: |
-          ssh -i ec2_key.pem ${EC2_USER}@${EC2_HOST} << 'ENDSSH'
+          ssh -i ec2_key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
             set -e
-            mkdir -p ~/${EC2_APP_DIR}
-            cd ~/${EC2_APP_DIR}
+            
+            # Используем синтаксис GitHub Actions напрямую
+            mkdir -p ~/${{ secrets.EC2_APP_DIR }}
+            cd ~/${{ secrets.EC2_APP_DIR }}
 
-            # Безопасный способ привязать репозиторий, даже если папка не пуста
             if [ ! -d ".git" ]; then
               echo "Инициализация гит-репозитория..."
               git init
@@ -102,8 +99,6 @@ jobs:
             VITE_API_URL=${{secrets.VITE_API_URL}}
             EOF
 
-            # Копируем .env в папки сервисов (если папки существуют)
-            mkdir -p server client
             cp .env ./server/.env
             cp .env ./client/.env
 
