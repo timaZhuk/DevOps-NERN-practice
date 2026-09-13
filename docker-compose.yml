@@ -14,10 +14,9 @@ services:
 
   frontend:
     build:
-      ./client
-      # context: ./client
-      # args:
-      #   VITE_API_URL: http://3.26.242.54:5000/api
+      context: ./client
+      args:
+        VITE_API_URL: VITE_API_URL
     environment:
       - VITE_API_URL=${VITE_API_URL}
     container_name: frontend

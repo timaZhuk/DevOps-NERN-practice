@@ -96,7 +96,7 @@ jobs:
 
             # Copy files .env to folders
             cp .env ./server/.env
-            cp .env /client/.env
+            cp .env ./client/.env
 
             docker compose up -d --build
 
